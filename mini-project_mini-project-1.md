@@ -339,9 +339,9 @@ dataset is about the stream flow monitored and includes information
 about each monitoring event and flow data collected.
 
 To further explore the dataset, I found that all the data were collected
-from 1 1 monitoring station. There were 2 types of extremes were
-recorded. And the number of unique values of the year and month
-variables were 109 and 11 respectively.
+from 1 monitoring station. There were 2 types of extremes were recorded.
+And the number of unique values of the year and month variables were 109
+and 11 respectively.
 
 ``` r
 ### how many monitoring stations were included? ###
@@ -527,7 +527,7 @@ ggplot(vancouver_trees,aes(x=diameter, y=after_stat(count/sum(count)))) +
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](mini-project_mini-project-1_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](mini-project_mini-project-1_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 In order to explore a bit more on the distribution of the variable
 diameter (e.g. to see the maximum, the quartiles, the interquartile
@@ -543,7 +543,7 @@ ggplot(vancouver_trees, aes(diameter)) +
     geom_boxplot()
 ```
 
-![](mini-project_mini-project-1_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+![](mini-project_mini-project-1_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 I found that it is still pretty hard to see the distribution of the
 variable diameter because of those super outliers. Therefore, I computed
@@ -571,9 +571,10 @@ filtering out observations whose diameter is larger than 40 cm before
 making a boxplot. Because we can see from both the histogram and the
 boxplot above that observations with diameter larger than 40 cm is only
 a very small porportion of our data, excluding them should not cause a
-problem when our purpose is to see the distribution a bit clearer.
+problem when our purpose is to see the distribution a bit more clearly.
 
-As the boxplot below shows, we can now see the distribution clearer.
+As the boxplot below shows, we can now see the distribution more
+clearly.
 
 ``` r
 # EX 5.Filter observations in your data according to your own criteria.
@@ -586,7 +587,7 @@ trees_dia_less_eq40  %>%
   geom_boxplot()
 ```
 
-![](mini-project_mini-project-1_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](mini-project_mini-project-1_files/figure-gfm/Filtering%20and%20plot%20again-1.png)<!-- -->
 
 Since I am interested to see how trees in different neighborhoods differ
 in diameter, I decided to stack multiple kernel density estimates across
@@ -604,7 +605,7 @@ vancouver_trees %>%
 
     ## Picking joint bandwidth of 1.36
 
-![](mini-project_mini-project-1_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](mini-project_mini-project-1_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 As we can see from the density plot above, those super outliers made it
 hard to see and compare the distributions again. Therefore, I made the
@@ -625,7 +626,7 @@ vancouver_trees %>%
 
     ## Picking joint bandwidth of 1.3
 
-![](mini-project_mini-project-1_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](mini-project_mini-project-1_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 I think diameter should be related to height for trees, so I explored
 the relationship between them using boxplots. Again, I excluded the
@@ -641,7 +642,7 @@ trees_dia_less_eq40 %>%
   geom_boxplot()
 ```
 
-![](mini-project_mini-project-1_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+![](mini-project_mini-project-1_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 Since I am also interested to see how species richness (i.e. number of
 species) differs among neighborhoods, I used the summarise() function to
