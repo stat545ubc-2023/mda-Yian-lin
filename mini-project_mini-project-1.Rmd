@@ -1,6 +1,6 @@
 ---
 title: "Mini Data-Analysis Deliverable 1"
-output: html_document
+output: github_document
 ---
 
 # Welcome to your (maybe) first-ever data analysis project!
@@ -10,7 +10,7 @@ And hopefully the first of many. Let's get started:
 1.  Install the [`datateachr`](https://github.com/UBC-MDS/datateachr) package by typing the following into your **R terminal**:
 
 <!-- -->
-
+    
     install.packages("devtools")
     devtools::install_github("UBC-MDS/datateachr")
 
@@ -132,9 +132,9 @@ glimpse(flow_sample)
 
 The *flow_sample* dataset is both a dataframe and tibbles, and it has `r nrow(flow_sample)` rows and `r ncol(flow_sample)` columns. Based on the column names, we can see that this dataset is about the stream flow monitored and includes information about each monitoring event and flow data collected. 
 
-To further explore the dataset, I found that all the data were collected from `r length(unique(flow_sample$station_id))` 1 monitoring station. There were 2 types of extremes were recorded. And the number of unique values of the year and month variables were 109 and 11 respectively.
+To further explore the dataset, I found that all the data were collected from `r length(unique(flow_sample$station_id))` monitoring station. There were 2 types of extremes were recorded. And the number of unique values of the year and month variables were 109 and 11 respectively.
 
-```{r}
+```{r monitoring stations}
 ### how many monitoring stations were included? ###
 flow_sample %>% 
   summarize(num_station = length(unique(station_id)),
@@ -155,7 +155,7 @@ I decided to pick the *vancouver_trees* dataset because I am interested in ecolo
 1.4 **(2 points)** Time for a  final decision! Going back to the beginning, it's important to have an *end goal* in mind. For example, if I had chosen the `titanic` dataset for my project, I might've wanted to explore the relationship between survival and other variables. Try to think of 1 research question that you would want to answer with your dataset. Note it down below.
 
 <!-------------------------- Start your work below ---------------------------->
-One of the research questions that I would want to answer is how trees in different neighborhoods differ in diameter.
+One of the research questions that I would like to answer is how trees in different neighborhoods differ in diameter.
 <!----------------------------------------------------------------------------->
 
 # Important note
@@ -184,15 +184,46 @@ Make sure that you're using dplyr and ggplot2 rather than base R for this task. 
 2.2 **(4 points)** For each of the 4 exercises that you complete, provide a *brief explanation* of why you chose that exercise in relation to your data (in other words, why does it make sense to do that?), and sufficient comments for a reader to understand your reasoning and code.
 
 <!-------------------------- Start your work below ---------------------------->
-I first made a relative frequency histogram of the variable diameter to see its distribution. I chose this exercise because I would like to see the distribution of the diameter, which is a numeric variable of my interest. From the plot we can see that most trees have diameter less than 50 cm and the distribtuion has a long tail on the right side.
+Before doing other things, I first investigated how many missing values there are per variable. As we can see from both the table and plot, five out of `r ncol(vancouver_trees)` variables have missing values, and over 50% of date_planted is missing. However, both diameter and neighbourhood_name do not have missing values.
+```{r missing values}
+# EX2. Investigate how many missing values there are per variable and plot the result.
+count_missing <- vancouver_trees %>%
+                  summarise_all(~(sum(is.na(.))))
+
+# Pivot from wide to long
+count_missing <- count_missing %>% 
+                    pivot_longer(cols = everything(),
+                                 names_to = "Variable",
+                                 values_to = "missing_count")
+count_missing
+
+# Plot it
+ggplot(data = count_missing,
+       aes(x = stats::reorder(Variable, missing_count))) +
+  geom_bar(aes(y = missing_count/nrow(vancouver_trees)),
+           stat = "identity",
+           position = "dodge",
+           width = 0.001,
+           colour = "Blue",
+           fill = "Blue") +
+  geom_point(aes(y = missing_count/nrow(vancouver_trees)),
+             colour = "Blue",
+             fill = "Blue") +
+  coord_flip() +
+  labs(y = "Proportion of missing values",
+       x = "Variables")
+```
+
+After checking on missing values, I made a relative frequency histogram of the variable diameter to see its distribution. I chose this exercise because I would like to see the distribution of the diameter, which is a numeric variable of my interest. From the plot we can see that most trees have diameter less than 50 cm and the distribtuion has a long tail on the right side.
 ```{r}
-# 1.Plot the distribution of the diameter variable.
+#EX 1.Plot the distribution of the diameter variable.
 ggplot(vancouver_trees,aes(x=diameter, y=after_stat(count/sum(count)))) +
   geom_histogram() +
   labs(y="Relative frequency")
 ```
 
-In order to explore a bit more on the distribution of the variable diameter (e.g. to see the maximum, the quartiles, the interquartile range), I chose to made a boxplot of it. As we can see from the boxplot, the maximum is about 440 cm and we have quite some outliers (i.e. trees that have really large diameters). The interquartile range is about 13 cm and the medium is about 10 cm. 
+In order to explore a bit more on the distribution of the variable diameter (e.g. to see the maximum, the quartiles, the interquartile range), I chose to made a boxplot of it. As we can see from the boxplot, the maximum is about 440 cm and we have quite some outliers (i.e. trees that have really large diameters). The interquartile range is about 13 cm and the medium is about 10 cm. So about 50% of the observations have diameter lower than 10 cm, but the maximum can go up to about 440 cm.
+
 ```{r}
 # EX6. Use a boxplot to look at the frequency of different observations within a single variable.
 ggplot(vancouver_trees, aes(diameter)) + 
@@ -210,13 +241,16 @@ vancouver_trees %>%
     Q3_dia = quantile(diameter, 0.75))
 ```
 
-One of the alternatives to see the distribution a bit clearer would be filtering out observations whose diameter is larger than 40 cm before making a boxplot. Because we can see from both the histogram and the boxplot above that observations with diameter larger than 40 cm is only a very small porportion of our data, excluding them should not cause a problem when our purpose is to see the distribution a bit clearer.
+One of the alternatives to see the distribution a bit clearer would be filtering out observations whose diameter is larger than 40 cm before making a boxplot. Because we can see from both the histogram and the boxplot above that observations with diameter larger than 40 cm is only a very small porportion of our data, excluding them should not cause a problem when our purpose is to see the distribution a bit more clearly.
 
-As the boxplot below shows, we can now see the distribution clearer.  
-```{r}
+As the boxplot below shows, we can now see the distribution more clearly.  
+```{r Filtering and plot again}
 # EX 5.Filter observations in your data according to your own criteria.
-vancouver_trees %>% 
-  filter(diameter <= 40)  %>% 
+# Filter out observations whose diameter is larger than 40 cm
+trees_dia_less_eq40 <- vancouver_trees %>% 
+                          filter(diameter <= 40)   
+# Plot again
+trees_dia_less_eq40  %>%
   ggplot(aes(diameter)) + 
   geom_boxplot()
 ```
@@ -233,7 +267,6 @@ vancouver_trees %>%
 As we can see from the density plot above, those super outliers made it hard to see and compare the distributions again. Therefore, I made the plot again by excluding observations with diameter larger than 40 cm. Now we can see that the diameter distribution of Downtown has a different shape when compared to others. Distributions of West end and Fairview are also special. However, all distributions peak at about 4 cm.
 ```{r}
 # EX 8.Use a density plot to explore any of your variables.
-# EX 5.Filter observations in your data according to your own criteria.
 # Plot again by excluding observations with diameter larger than 40 cm
 vancouver_trees %>% 
    filter(diameter <= 40) %>% 
@@ -241,12 +274,24 @@ vancouver_trees %>%
    ggridges::geom_density_ridges()
 ```
 
-Since I am also interested to see how species richness (i.e. number of species) differs among neighborhoods, I used the summarise() function to compute tree richness for each neighborhoods and visualize it using a bar graph.
+I think diameter should be related to height for trees, so I explored the relationship between them using boxplots. Again, I excluded the observations with diameter larger than 40 so that we could see patterns more clearly. As we can see from the plot, there must be a positive association between diameter and height for trees. 
 ```{r}
+# EX 4.Explore the relationship between 2 variables in a plot.
+# Explore the relationship between diameter and height_range_id 
+trees_dia_less_eq40 %>%
+  ggplot(aes(factor(height_range_id), diameter)) + 
+  geom_boxplot()
+```
+
+Since I am also interested to see how species richness (i.e. number of species) differs among neighborhoods, I used the summarise() function to compute species richness for each neighborhoods and visualize it using a bar graph. As we can see from the barplot, Downtown has the lowest species richness.
+```{r species richness}
+# EX 4.Explore the relationship between 2 variables in a plot.
+# EX 2. Create a new variable based on other variables in your data
+# Explore the relationship between species richness and neighborhood
 #compute species richness for each neighborhoods
 species_richness_neighbourhood <- vancouver_trees %>%
                                   group_by(neighbourhood_name) %>%
-                                  summarize(species_richness = 
+                                  summarize(species_richness =
                                               length(unique(species_name)))
 
 #visualize it using a bar graph
@@ -259,18 +304,6 @@ species_richness_neighbourhood %>%
 
 ```
 
-
-```{r}
-# EX 2.Create a new variable based on other variables in your data.
-# Create a new variable: age
-vancouver_trees %>%
-    group_by(neighbourhood_name)
-    summarise(tree_richness = length(unique(species_name)))
-```
-
-```{r}
-# EX 4.Filter observations in your data according to your own criteria.
-```
 <!----------------------------------------------------------------------------->
 
 # Task 3: Choose research questions 
@@ -278,6 +311,10 @@ vancouver_trees %>%
 **(4 points)** So far, you have chosen a dataset and gotten familiar with it through exploring the data. You have also brainstormed one research question that interested you (Task 1.4).  Now it's time to pick 4 research questions that you would like to explore in Milestone 2! Write the 4 questions and any additional comments below. 
 
 <!--- *****START HERE***** --->
+* How is the height of trees related to their age and the usage of root barrier?
+* How is species richness in different neighborhoods related to the total number of trees in the neighborhood?
+* What is the relationship between diameter and height? How much variation in diameter can be explained by height_range_id?
+* How do trees in different neighborhoods differ in diameter?
 
 <!----------------------------->
 
