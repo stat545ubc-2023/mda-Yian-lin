@@ -93,7 +93,7 @@ Make sure it's clear what research question you are doing each operation for!
 
 <!------------------------- Start your work below ----------------------------->
 #### For research question 1
-RQ1: *How is the height of trees related to their age and the usage of root barrier?*:
+RQ1: *How is the height of trees related to their age and the usage of root barrier?*
 
 ##### Summarizing
 I first convert height_range_id into a factor. We can see that there are 11 levels of height_range_id as a factor. 
@@ -142,22 +142,25 @@ summary(vancouver_trees_w_age$age)
 ```
 
 For trees that have date planted recorded, I made a jitterplot to see how height is related to age because this is a part of research question 1. Here I customized the alpha transparency to help with the large amount of overlapping points. As we can see from the plot below, it seems that there is an positive association between height and age of trees. 
-```{r plot}
+```{r jitterplot}
 # jitterplot to show how age is spread within each height_range_id category.
 ggplot(vancouver_trees_w_age, aes(height_range_id, age)) + 
     geom_jitter(alpha = 0.1, width=0.1)
 ```
+
 #### For research question 2
 RQ2: *How is species richness in different neighborhoods related to the total number of trees in the neighborhood?*:
 
 ##### Summarizing
-For this research question, the four summarizing options provided in the instruction do not help much. Therefore, I did it in a way that helps with my research question. I computed the species richness and total number of trees for each neighborhood, and created a new tibble by merging the two summary tibbles. I then used the new tibble to make a scatterplot to explore the relationship between species richness and total number of trees. Therefore, this task help answer the research question.
+I computed the species richness and total number of trees for each neighborhood, and created a new tibble by merging the two summary tibbles. I then used the new tibble to make a scatterplot to explore the relationship between species richness and total number of trees. Therefore, this task help answer the research question.
 ``` {r species richness}
 #compute species richness for each neighborhood
 species_richness_neighbourhood <- vancouver_trees %>%
                                   group_by(neighbourhood_name) %>%
                                   summarize(species_richness =
                                               length(unique(species_name)))
+
+#Summarizing Option 2: Compute the number of observations for each category of the categorical variable neighborhood.
 
 #compute the total number of trees for each neighborhood
 total_trees_neighbourhood <- vancouver_trees %>%
@@ -182,13 +185,6 @@ ggplot(data_QR2, aes(x = n, y = species_richness)) +
 
 ```
 
-```{r}
-
-```
-
-```{r}
-
-```
 
 #### For research question 3
 RQ3: *What is the relationship between diameter and height? How much variation in diameter can be explained by height_range_id?*
@@ -276,7 +272,7 @@ vancouver_trees %>%
 Based on the operations that you've completed, how much closer are you to answering your research questions? Think about what aspects of your research questions remain unclear. Can your research questions be refined, now that you've investigated your data a bit more? Which research questions are yielding interesting results?
 
 <!------------------------- Write your answer here ---------------------------->
-
+I think I am definitely closer to answering my research questions. By doing this data exploration tasks, I get some basic ideas about what the results of further analysis might be and what the next steps should be. For example, for research question 2, the scatterplot gives me more idea on how species richness and the total number of trees in different neighborhoods relate to each other and whether it is reasonable to use a linear regression model. 
 
 <!----------------------------------------------------------------------------->
 
@@ -295,7 +291,13 @@ A reminder of the definition of *tidy* data:
 Based on the definition above, can you identify if your data is tidy or untidy? Go through all your columns, or if you have \>8 variables, just pick 8, and explain whether the data is untidy or tidy.
 
 <!--------------------------- Start your work below --------------------------->
+```{r}
 
+```
+
+```{r}
+
+```
 <!----------------------------------------------------------------------------->
 
 ### 2.2 (4 points)
@@ -316,22 +318,61 @@ Now, you should be more familiar with your data, and also have made progress in 
 
 <!-------------------------- Start your work below ---------------------------->
 
-1.  *FILL_THIS_IN*
-2.  *FILL_THIS_IN*
+1.  RQ 2: *How is species richness in different neighborhoods related to the total number of trees in the neighborhood?*
+2.  RQ 3: *What is the relationship between diameter and height? How much variation in diameter can be explained by height_range_id?*
 
 <!----------------------------------------------------------------------------->
 
 Explain your decision for choosing the above two research questions.
 
 <!--------------------------- Start your work below --------------------------->
-
+I choose the RQ 2 and RQ 3 from the four research questions. I choose RQ 2 because I can see from the scatterplor I made above that there is a positive association between species richness and total number of trees. I choose RQ 3 because based on the boxplot I made above, height_range_id should explain some variation in diameter.
 <!----------------------------------------------------------------------------->
 
 Now, try to choose a version of your data that you think will be appropriate to answer these 2 questions. Use between 4 and 8 functions that we've covered so far (i.e. by filtering, cleaning, tidy'ing, dropping irrelevant columns, etc.).
 
 (If it makes more sense, then you can make/pick two versions of your data, one for each research question.) 
 
-<!--------------------------- Start your work below --------------------------->
+<!--------------------------- Start your work below
+--------------------------->
+For RQ 2, I need the columns tree_id, neighbourhood_name to compute the total number of trees for each neighbourhood. I need the columns species_name and neighbourhood_name to compute the species richnessfor each neighbourhood. I also removed rows with NA value in any column from the newly created dataset.
+
+```{r Data_for_RQ2}
+Data_for_RQ2 <- vancouver_trees %>%
+  select(tree_id, species_name, neighbourhood_name) %>%
+  na.omit() #remove rows with NA value in any column
+
+head(Data_for_RQ2)
+```
+After creating Data_for_RQ2, I also created another new tibble called data_RQ2 for the regression analysis. In data_RQ2, I have the species richness and total number of trees computed for each neighborhood.
+```{r}
+#compute species richness for each neighborhood
+species_richness_neighbourhood <- vancouver_trees %>%
+                                  group_by(neighbourhood_name) %>%
+                                  summarize(species_richness =
+                                  length(unique(species_name)))
+
+#compute the total number of trees for each neighborhood
+total_trees_neighbourhood <- vancouver_trees %>%
+                                  group_by(neighbourhood_name) %>%
+                                  summarize(n = n())
+
+# Combine into one new tibble
+data_QR2 <- left_join(species_richness_neighbourhood, total_trees_neighbourhood, by="neighbourhood_name")
+
+data_QR2
+```
+
+For RQ 3, I need the columns diameter and height_range_id. I also removed rows with NA value in any column from the newly created dataset.
+
+```{r Data_for_RQ3}
+Data_for_RQ3 <- vancouver_trees %>%
+  select(tree_id, diameter, height_range_id) %>%
+  na.omit() #remove rows with NA value in any column
+
+head(Data_for_RQ3)
+
+```
 
 # Task 3: Modelling
 
@@ -341,9 +382,9 @@ Pick a research question from 1.2, and pick a variable of interest (we'll call i
 
 <!-------------------------- Start your work below ---------------------------->
 
-**Research Question**: FILL_THIS_IN
+**Research Question**: RQ 2: How is species richness in different neighborhoods related to the total number of trees in the neighborhood?:
 
-**Variable of interest**: FILL_THIS_IN
+**Variable of interest**: species richness
 
 <!----------------------------------------------------------------------------->
 
@@ -358,7 +399,12 @@ Fit a model or run a hypothesis test that provides insight on this variable with
     -   You could use `lm()` to test for significance of regression coefficients.
 
 <!-------------------------- Start your work below ---------------------------->
-
+Here I fitted a linear regression model that makes predictions on species richness of a neighborhood using the total number of trees (with 100 as unit) in that neighborhood. 
+```{r}
+# fit a linear regression model
+model1 <- lm(species_richness ~ I(n/100), data_QR2)
+print(model1)
+```
 <!----------------------------------------------------------------------------->
 
 ## 3.2 (3 points)
@@ -370,7 +416,10 @@ Produce something relevant from your fitted model: either predictions on Y, or a
 -   Obtain your results using the `broom` package if possible. If your model is not compatible with the broom function you're needing, then you can obtain your results by some other means, but first indicate which broom function is not compatible.
 
 <!-------------------------- Start your work below ---------------------------->
-
+Here I chose to produce the estimated slope and its p-value. According to the R output, the estimated slope is 0.6831346, and its p-value is very close to 0.
+```{r}
+print(broom::tidy(model1))
+```
 <!----------------------------------------------------------------------------->
 
 # Task 4: Reading and writing data
@@ -385,7 +434,11 @@ Take a summary table that you made from Task 1, and write it as a csv file in yo
 -   **Reproducibility criteria**: You should be able to delete the csv file, and remake it simply by knitting this Rmd file.
 
 <!-------------------------- Start your work below ---------------------------->
-
+Here I wrote data_RQ3 as a csv file in the output folder.
+```{r output}
+#write data_RQ3 as a csv file in the output folder
+write_csv(data_RQ3, file = here::here("output","summary_table_RQ3.csv"))
+```
 <!----------------------------------------------------------------------------->
 
 ## 4.2 (3 points)
@@ -395,7 +448,14 @@ Write your model object from Task 3 to an R binary file (an RDS), and load it ag
 -   The same robustness and reproducibility criteria as in 4.1 apply here.
 
 <!-------------------------- Start your work below ---------------------------->
-
+Here I wrote model1 from Task 3 to an R binary file (an RDS), and load it again.
+```{r output_model_object}
+#write model1 as a csv file in the output folder
+saveRDS(model1, file= here::here("output","model_1.rds"))
+#load it again
+model_read <- readRDS(file= here::here("output","model_1.rds"))
+print(model_read)
+```
 <!----------------------------------------------------------------------------->
 
 # Overall Reproducibility/Cleanliness/Coherence Checklist 
