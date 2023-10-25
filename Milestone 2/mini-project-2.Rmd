@@ -1,6 +1,6 @@
 ---
 title: "Mini Data Analysis Milestone 2"
-output: html_document
+output: github_document
 ---
 
 *To complete this milestone, you can either edit [this `.rmd` file](https://raw.githubusercontent.com/UBC-STAT/stat545.stat.ubc.ca/master/content/mini-project/mini-project-2.Rmd) directly. Fill in the sections that are commented out with `<!--- start your work here--->`. When you are done, make sure to knit to an `.md` file by changing the output in the YAML header to `github_document`, before submitting a tagged release on canvas.*
@@ -258,13 +258,6 @@ vancouver_trees %>%
   
 ```
 
-``` {r}
-
-```
-
-```{r}
-
-```
 <!----------------------------------------------------------------------------->
 
 ### 1.3 (2 points)
@@ -357,7 +350,11 @@ Now I used the transpose_tibble() function to tidy the first 6 rows of data_eigh
 tidy_back_eight_columns <- head(untidy_eight_columns) %>%
   transpose_tibble(col_names = Characteristic, id_col = "tree_id")
 
-tidy_back_eight_columns
+tidy_back_eight_columns <- tidy_back_eight_columns %>%
+  mutate(tree_id=as.double(tree_id), height_range_id=as.factor(height_range_id),
+         diameter=as.double(diameter), date_planted=as.Date(date_planted))
+
+print(tidy_back_eight_columns)
 ```
 <!----------------------------------------------------------------------------->
 
@@ -448,7 +445,7 @@ Fit a model or run a hypothesis test that provides insight on this variable with
     -   You could use `lm()` to test for significance of regression coefficients.
 
 <!-------------------------- Start your work below ---------------------------->
-Here I fitted a linear regression model that makes predictions on species richness of a neighborhood using the total number of trees (with 100 as unit) in that neighborhood. 
+Here I fitted a linear regression model that makes predictions on species richness of a neighborhood using the total number of trees (with 100 as unit) in that neighborhood. The output was printed below. 
 ```{r}
 # fit a linear regression model
 model1 <- lm(species_richness ~ I(n/100), data_QR2)
