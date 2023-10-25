@@ -291,13 +291,17 @@ A reminder of the definition of *tidy* data:
 Based on the definition above, can you identify if your data is tidy or untidy? Go through all your columns, or if you have \>8 variables, just pick 8, and explain whether the data is untidy or tidy.
 
 <!--------------------------- Start your work below --------------------------->
-```{r}
+There are 20 columns in my dataset vancouver_trees. I picked the most relevant 8 columns (i.e. tree_id, species_name, root_barrier, neighbourhood_name, height_range_id, diameter, date_planted, curb) for this task. As we can see from the first 6 rows, my data is tidy. There is one row per tree (observation). Each column is a variable (a quantity of interest recorded for each tree). And each cell is a value.
+```{r task2.1}
+# print the first 6 rows
+data_eight_columns <- vancouver_trees %>%
+  select(tree_id, species_name, root_barrier, neighbourhood_name,
+         height_range_id, diameter, date_planted, curb) %>%
+  head()
 
+data_eight_columns
 ```
 
-```{r}
-
-```
 <!----------------------------------------------------------------------------->
 
 ### 2.2 (4 points)
@@ -309,7 +313,52 @@ If your data is untidy, then tidy it! Then, untidy it back to it's original stat
 Be sure to explain your reasoning for this task. Show us the "before" and "after".
 
 <!--------------------------- Start your work below --------------------------->
+Here I did the untidying and tidying back operations on the first 6 rows of the data_eight_columns to illustrate the idea. These operations can be repeated to the whole data_eight_columns dataset easily. 
 
+I first untidy the first 6 rows of data_eight_columns by using the transpose_tibble() available online at https://rdrr.io/github/allydunham/tblhelpr/src/R/convert_tibbles.R. As we can see from the output, the new tibble created is untidy because now each row is not an observation, and each column is not a varaible. In the new tibble, each column, except the first column, stores data for one tree. Each row stores data on one characteristic for all trees. 
+```{r task2.2}
+# Untidy data_eight_columns
+# the tibble_to_matrix() and transpose_tibble() were copied from https://rdrr.io/github/allydunham/tblhelpr/src/R/convert_tibbles.R. The package tblhelpr can't be installed in R. 
+tibble_to_matrix <- function(tbl, ..., row_names=NULL){
+  cols <- rlang::enquos(...)
+
+  mat <- as.matrix(dplyr::select(tbl, !!! cols))
+
+  if (!is.null(row_names)){
+    if (length(row_names) == 1 & row_names[1] %in% colnames(tbl)){
+      row_names <- tbl[[row_names]]
+    }
+    rownames(mat) <- row_names
+  }
+
+  return(mat)
+}
+
+transpose_tibble <- function(tbl, col_names, id_col = "columns"){
+  col_names <- rlang::enquo(col_names)
+
+  tibble_to_matrix(tbl, -!!col_names,
+                   row_names = dplyr::pull(tbl, !!col_names)) %>%
+    t() %>%
+    dplyr::as_tibble(rownames = id_col) %>%
+    return()
+}
+
+# Use the transpose_tibble() to untidy the first 6 rows of data_eight_columns
+untidy_eight_columns <- head(data_eight_columns) %>%
+  transpose_tibble(col_names = tree_id, id_col = "Characteristic")
+
+untidy_eight_columns
+```
+
+Now I used the transpose_tibble() function to tidy the first 6 rows of data_eight_columns back to it’s original state.
+```{r}
+# Use the transpose_tibble() to tidy the first 6 rows of data_eight_columns back to it’s original state
+tidy_back_eight_columns <- head(untidy_eight_columns) %>%
+  transpose_tibble(col_names = Characteristic, id_col = "tree_id")
+
+tidy_back_eight_columns
+```
 <!----------------------------------------------------------------------------->
 
 ### 2.3 (4 points)
